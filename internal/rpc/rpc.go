@@ -22,29 +22,49 @@ type BaseMessage struct {
 	Method string `json:"method"`
 }
 
-func DecodeMessage(msg []byte) (int, error) {
+func DecodeMessage(msg []byte) (string, []byte, error) {
 	header, content, found := bytes.Cut(msg, []byte{'\r', '\n', '\r', '\n'})
 	if !found {
-		return 0, errors.New("Did not find separator")
+		return "", nil, errors.New("Did not find separator")
 	}
 
 	// Content-Length: <number>
 	// move to the end of this slice after Content of length
 	contentLenghtBytes := header[len("Content-Length: "):]
-	contentLenth, err := strconv.Atoi(string(contentLenghtBytes))
+	contentLength, err := strconv.Atoi(string(contentLenghtBytes))
 	if err != nil {
-		return 0, err
+		return "", nil, err
 	}
 
 	// TODO: remove me after test
 	_ = content
 
 	var baseMessage BaseMessage
-	if err := json.Unmarshal(&baseMessage); err != nil {
-		return 0, err
+	if err := json.Unmarshal(content[:contentLength], &baseMessage); err != nil {
+		return "", nil, err
 	}
 
-	// https://www.youtube.com/watch?v=YsdlcQoHqPY 15:27
+	return baseMessage.Method, content[:contentLength], nil
+}
 
-	return contentLenth, nil
+func Split(data []byte, _ bool) (advance int, token []byte, err error) {
+	header, content, found := bytes.Cut(data, []byte{'\r', '\n', '\r', '\n'})
+	if !found {
+		return 0, nil, nil
+	}
+
+	// Content-Length: <number>
+	// move to the end of this slice after Content of length
+	contentLenghtBytes := header[len("Content-Length: "):]
+	contentLength, err := strconv.Atoi(string(contentLenghtBytes))
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if len(content) < contentLength {
+		return 0, nil, nil
+	}
+
+	totalLength := len(header) + 4 + contentLength
+	return totalLength, data[:totalLength], nil
 }
