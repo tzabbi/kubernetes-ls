@@ -10,5 +10,5 @@ This LSP is designed for Kubernetes built-in resources and custom resource defin
 - json encode and decode of ide sended things
 - Server supports stdin and stdout
 
-Video: https://www.youtube.com/watch?v=YsdlcQoHqPY
-Current Timestamp: 27:34/28:31
+Video: https://youtu.be/YsdlcQoHqPY?si=d_iPyUUT5Css-Ok8&t=2445
+Current Timestamp: 40:45
